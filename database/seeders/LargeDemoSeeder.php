@@ -30,19 +30,20 @@ class LargeDemoSeeder extends Seeder
         DB::transaction(function () {
             $password = Hash::make('password');
 
-            $selekcije = $this->createSelekcije();
-            $treneri = $this->createTreneri($selekcije, $password);
+            $treneri = $this->createTreneri($password);
+            $selekcije = $this->createSelekcije($treneri);
+            $treneriPoSelekciji = $this->assignTreneriToSelekcije($treneri, $selekcije);
             $clanovi = $this->createClanovi($selekcije, $password);
 
             $this->createAdminUser($password);
-            $this->createTreninzi($selekcije, $treneri, $clanovi);
-            $utakmice = $this->createUtakmice($selekcije, $treneri);
+            $this->createTreninzi($selekcije, $treneriPoSelekciji, $clanovi);
+            $utakmice = $this->createUtakmice($selekcije, $treneriPoSelekciji);
             $this->createTimoviINastupi($utakmice, $clanovi);
             $this->createClanarine($clanovi);
         });
     }
 
-    private function createSelekcije(): array
+    private function createSelekcije(array $treneri): array
     {
         $data = [
             ['Petlici', 'U9'],
@@ -55,17 +56,23 @@ class LargeDemoSeeder extends Seeder
 
         $selekcije = [];
 
-        foreach ($data as [$naziv, $uzrast]) {
-            $selekcije[$naziv] = Selekcija::firstOrCreate(
+        foreach ($data as $index => [$naziv, $uzrast]) {
+            $attributes = ['uzrasna_kategorija' => $uzrast];
+
+            if (Schema::hasColumn('selekcije', 'trener_id')) {
+                $attributes['trener_id'] = $treneri[$index % count($treneri)]->id;
+            }
+
+            $selekcije[$naziv] = Selekcija::updateOrCreate(
                 ['naziv' => $naziv],
-                ['uzrasna_kategorija' => $uzrast]
+                $attributes
             );
         }
 
         return $selekcije;
     }
 
-    private function createTreneri(array $selekcije, string $password): array
+    private function createTreneri(string $password): array
     {
         $names = [
             ['Milan', 'Radovic', 'UEFA A'],
@@ -82,11 +89,9 @@ class LargeDemoSeeder extends Seeder
             ['Filip', 'Djordjevic', 'UEFA C'],
         ];
 
-        $selectionValues = array_values($selekcije);
         $treneri = [];
 
         foreach ($names as $index => [$ime, $prezime, $licenca]) {
-            $selekcija = $selectionValues[$index % count($selectionValues)];
             $attributes = [
                 'ime' => $ime,
                 'prezime' => $prezime,
@@ -94,10 +99,6 @@ class LargeDemoSeeder extends Seeder
                 'licenca' => $licenca,
                 'datum_zaposlenja' => Carbon::create(2018 + ($index % 6), 1 + ($index % 8), 1 + ($index % 20))->toDateString(),
             ];
-
-            if (Schema::hasColumn('treneri', 'selekcija_id')) {
-                $attributes['selekcija_id'] = $selekcija->id;
-            }
 
             $trener = Trener::updateOrCreate(
                 ['telefon' => '063700'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT)],
@@ -114,10 +115,28 @@ class LargeDemoSeeder extends Seeder
                 ]
             );
 
-            $treneri[$selekcija->naziv][] = $trener;
+            $treneri[] = $trener;
         }
 
         return $treneri;
+    }
+
+    private function assignTreneriToSelekcije(array $treneri, array $selekcije): array
+    {
+        $selectionValues = array_values($selekcije);
+        $treneriPoSelekciji = [];
+
+        foreach ($treneri as $index => $trener) {
+            $selekcija = $selectionValues[$index % count($selectionValues)];
+
+            if (Schema::hasColumn('treneri', 'selekcija_id')) {
+                $trener->update(['selekcija_id' => $selekcija->id]);
+            }
+
+            $treneriPoSelekciji[$selekcija->naziv][] = $trener->fresh() ?? $trener;
+        }
+
+        return $treneriPoSelekciji;
     }
 
     private function createClanovi(array $selekcije, string $password): array
