@@ -21,12 +21,6 @@ class LargeDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        if (User::where('email', 'demo.admin@skola.rs')->exists()) {
-            $this->command?->info('Large demo data already exists. Skipping.');
-
-            return;
-        }
-
         DB::transaction(function () {
             $password = Hash::make('password');
 
@@ -46,12 +40,18 @@ class LargeDemoSeeder extends Seeder
     private function createSelekcije(array $treneri): array
     {
         $data = [
-            ['Petlici', 'U9'],
-            ['Mladji pioniri', 'U11'],
-            ['Pioniri', 'U13'],
-            ['Kadeti', 'U15'],
-            ['Juniori', 'U17'],
-            ['Omladinci', 'U19'],
+            ['Demo Petlici A', 'U9'],
+            ['Demo Petlici B', 'U9'],
+            ['Demo Mladji pioniri A', 'U11'],
+            ['Demo Mladji pioniri B', 'U11'],
+            ['Demo Pioniri A', 'U13'],
+            ['Demo Pioniri B', 'U13'],
+            ['Demo Kadeti A', 'U15'],
+            ['Demo Kadeti B', 'U15'],
+            ['Demo Juniori A', 'U17'],
+            ['Demo Juniori B', 'U17'],
+            ['Demo Omladinci A', 'U19'],
+            ['Demo Omladinci B', 'U19'],
         ];
 
         $selekcije = [];
@@ -153,12 +153,12 @@ class LargeDemoSeeder extends Seeder
         ];
 
         $birthYearBySelection = [
-            'Petlici' => 2017,
-            'Mladji pioniri' => 2015,
-            'Pioniri' => 2013,
-            'Kadeti' => 2011,
-            'Juniori' => 2009,
-            'Omladinci' => 2007,
+            'U9' => 2017,
+            'U11' => 2015,
+            'U13' => 2013,
+            'U15' => 2011,
+            'U17' => 2009,
+            'U19' => 2007,
         ];
 
         $clanovi = [];
@@ -173,7 +173,7 @@ class LargeDemoSeeder extends Seeder
                 $clan = Clan::create([
                     'ime' => $ime,
                     'prezime' => $prezime,
-                    'datum_rodjenja' => Carbon::create($birthYearBySelection[$naziv], 1 + ($i % 12), 2 + ($i % 24))->toDateString(),
+                    'datum_rodjenja' => Carbon::create($birthYearBySelection[$selekcija->uzrasna_kategorija], 1 + ($i % 12), 2 + ($i % 24))->toDateString(),
                     'telefon_roditelja' => '064800'.str_pad((string) $globalIndex, 3, '0', STR_PAD_LEFT),
                     'email_roditelja' => $email,
                     'datum_uclanjenja' => Carbon::create(2025, 8 + ($i % 4), 1 + ($i % 20))->toDateString(),
@@ -201,12 +201,14 @@ class LargeDemoSeeder extends Seeder
 
     private function createAdminUser(string $password): void
     {
-        User::create([
-            'name' => 'Demo Administrator',
-            'email' => 'demo.admin@skola.rs',
-            'password' => $password,
-            'role' => 'administrator',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'demo.admin@skola.rs'],
+            [
+                'name' => 'Demo Administrator',
+                'password' => $password,
+                'role' => 'administrator',
+            ]
+        );
     }
 
     private function createTreninzi(array $selekcije, array $treneri, array $clanovi): void
