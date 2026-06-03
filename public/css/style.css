@@ -790,7 +790,7 @@ textarea { min-height: 96px; resize: vertical; }
 }
 
 @media (max-width: 600px) {
-    .welcome { padding-left: 0; padding-right: 0; }
+    .welcome { padding-left: 14px; padding-right: 14px; }
     .welcome-grid { justify-items: start; }
     .welcome-copy,
     .hero-photo {
@@ -829,7 +829,7 @@ textarea { min-height: 96px; resize: vertical; }
 
 @media (max-width: 430px) {
     .topbar { padding: 14px 16px; }
-    .welcome { padding: 22px 0; }
+    .welcome { padding: 22px 14px; }
     .btn, button { padding: 8px 12px; }
     .welcome-copy h1 { font-size: 34px; }
 }
