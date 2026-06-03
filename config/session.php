@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Str;
 
+$sessionDomain = env('SESSION_DOMAIN');
+
+if (in_array($sessionDomain, [null, '', 'null', '"null"'], true)) {
+    $sessionDomain = null;
+}
+
 return [
     'driver' => env('SESSION_DRIVER', 'database'),
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
@@ -14,8 +20,8 @@ return [
     'lottery' => [2, 100],
     'cookie' => env('SESSION_COOKIE', Str::slug(env('APP_NAME', 'laravel'), '_').'_session'),
     'path' => env('SESSION_PATH', '/'),
-    'domain' => env('SESSION_DOMAIN'),
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'domain' => $sessionDomain,
+    'secure' => env('SESSION_SECURE_COOKIE', str_starts_with((string) env('APP_URL'), 'https://')),
     'http_only' => env('SESSION_HTTP_ONLY', true),
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
