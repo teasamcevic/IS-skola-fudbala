@@ -25,6 +25,38 @@
 
     @auth
         <div class="shell">
+            <details class="mobile-menu">
+                <summary>Meni</summary>
+                <nav>
+                    @if(auth()->user()->role === 'administrator')
+                        <a href="{{ route('admin.dashboard') }}" @class(['active' => request()->routeIs('admin.dashboard')])>Dashboard</a>
+                        <a href="{{ route('admin.clanovi.index') }}" @class(['active' => request()->routeIs('admin.clanovi.*')])>Clanovi</a>
+                        <a href="{{ route('admin.treneri.index') }}" @class(['active' => request()->routeIs('admin.treneri.*')])>Treneri</a>
+                        <a href="{{ route('admin.selekcije.index') }}" @class(['active' => request()->routeIs('admin.selekcije.*')])>Selekcije</a>
+                        <a href="{{ route('admin.treninzi.index') }}" @class(['active' => request()->routeIs('admin.treninzi.*')])>Treninzi</a>
+                        <a href="{{ route('admin.utakmice.index') }}" @class(['active' => request()->routeIs('admin.utakmice.*')])>Utakmice</a>
+                        <a href="{{ route('admin.timovi.index') }}" @class(['active' => request()->routeIs('admin.timovi.*')])>Timovi</a>
+                        <a href="{{ route('admin.napredak.index') }}" @class(['active' => request()->routeIs('admin.napredak.*')])>Napredak</a>
+                        <a href="{{ route('admin.clanarine.index') }}" @class(['active' => request()->routeIs('admin.clanarine.*')])>Clanarine</a>
+                        <a href="{{ route('admin.izvestaji') }}" @class(['active' => request()->routeIs('admin.izvestaji')])>Izvestaji</a>
+                    @elseif(auth()->user()->role === 'trener')
+                        <a href="{{ route('trener.dashboard') }}" @class(['active' => request()->routeIs('trener.dashboard')])>Dashboard</a>
+                        <a href="{{ route('trener.selekcija') }}" @class(['active' => request()->routeIs('trener.selekcija')])>Moja selekcija</a>
+                        <a href="{{ route('trener.clanovi') }}" @class(['active' => request()->routeIs('trener.clanovi')])>Clanovi</a>
+                        <a href="{{ route('trener.treninzi.index') }}" @class(['active' => request()->routeIs('trener.treninzi.*')])>Treninzi</a>
+                        <a href="{{ route('trener.utakmice.index') }}" @class(['active' => request()->routeIs('trener.utakmice.*')])>Utakmice</a>
+                        <a href="{{ route('trener.timovi.index') }}" @class(['active' => request()->routeIs('trener.timovi.*')])>Timovi</a>
+                        <a href="{{ route('trener.napredak.index') }}" @class(['active' => request()->routeIs('trener.napredak.*')])>Napredak</a>
+                    @else
+                        <a href="{{ route('roditelj.dashboard') }}" @class(['active' => request()->routeIs('roditelj.dashboard')])>Dashboard</a>
+                        <a href="{{ route('roditelj.profil') }}" @class(['active' => request()->routeIs('roditelj.profil')])>Profil clana</a>
+                        <a href="{{ route('roditelj.treninzi') }}" @class(['active' => request()->routeIs('roditelj.treninzi')])>Treninzi</a>
+                        <a href="{{ route('roditelj.utakmice') }}" @class(['active' => request()->routeIs('roditelj.utakmice')])>Utakmice</a>
+                        <a href="{{ route('roditelj.napredak') }}" @class(['active' => request()->routeIs('roditelj.napredak')])>Napredak</a>
+                        <a href="{{ route('roditelj.clanarine') }}" @class(['active' => request()->routeIs('roditelj.clanarine')])>Clanarine</a>
+                    @endif
+                </nav>
+            </details>
             <aside class="sidebar">
                 @if(auth()->user()->role === 'administrator')
                     <div class="nav-kicker">Administracija</div>
