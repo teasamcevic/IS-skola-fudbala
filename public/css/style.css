@@ -97,12 +97,14 @@ a:hover { text-decoration: underline; }
     display: grid;
     grid-template-columns: 248px 1fr;
     min-height: calc(100vh - 58px);
+    min-width: 0;
 }
 
 .sidebar {
     padding: 18px 16px;
     border-right: 1px solid var(--line);
     background: rgba(255, 255, 255, .92);
+    min-width: 0;
 }
 
 .nav-kicker {
@@ -137,6 +139,7 @@ a:hover { text-decoration: underline; }
     width: 100%;
     max-width: 1180px;
     padding: 28px 24px 44px;
+    min-width: 0;
 }
 
 .page-head,
@@ -428,10 +431,12 @@ p { line-height: 1.55; }
 
 .table-wrap {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -576,6 +581,103 @@ textarea { min-height: 96px; resize: vertical; }
 .pagination {
     margin-top: 14px;
     color: var(--muted);
+    padding: 12px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.pagination nav,
+.pagination nav > div,
+.pagination nav span,
+.pagination nav a {
+    min-width: 0;
+}
+
+.pagination nav > div {
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination .hidden {
+    display: none;
+}
+
+.pagination .sm\:hidden {
+    display: flex;
+}
+
+.pagination .sm\:hidden a,
+.pagination .sm\:hidden span,
+.pagination .inline-flex > a,
+.pagination .inline-flex > span,
+.pagination [aria-current="page"] span,
+.pagination [aria-disabled="true"] span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--green);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.pagination [aria-current="page"] span {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+}
+
+.pagination [aria-disabled="true"] span,
+.pagination .cursor-default {
+    color: var(--muted);
+    background: #f7f9f8;
+}
+
+.pagination svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex: 0 0 auto;
+}
+
+.pagination p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.pagination .inline-flex {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0;
+}
+
+.pagination .inline-flex > a,
+.pagination .inline-flex > span,
+.pagination [aria-current="page"] span,
+.pagination [aria-disabled="true"] span {
+    margin-left: -1px;
+}
+
+@media (min-width: 640px) {
+    .pagination .sm\:hidden {
+        display: none;
+    }
+
+    .pagination .hidden.sm\:flex-1,
+    .pagination .sm\:flex {
+        display: flex;
+    }
+
+    .pagination .sm\:items-center {
+        align-items: center;
+    }
+
+    .pagination .sm\:justify-between {
+        justify-content: space-between;
+    }
 }
 
 .auth-card {
@@ -598,13 +700,17 @@ textarea { min-height: 96px; resize: vertical; }
 }
 
 @media (max-width: 820px) {
-    .shell { grid-template-columns: 1fr; }
+    .shell {
+        display: block;
+        min-height: 0;
+    }
     .sidebar {
         display: flex;
         gap: 6px;
         overflow-x: auto;
         border-right: 0;
         border-bottom: 1px solid var(--line);
+        width: 100%;
     }
     .sidebar a { white-space: nowrap; }
     .nav-kicker { display: none; }
@@ -645,6 +751,21 @@ textarea { min-height: 96px; resize: vertical; }
     .match-card { left: 14px; bottom: 14px; }
     .landing-cards { grid-template-columns: 1fr; }
     .feature-card { min-height: 170px; }
+    table { min-width: 620px; }
+    .inline-form { grid-template-columns: 1fr; }
+    .pagination {
+        padding: 10px;
+    }
+    .pagination .sm\:hidden {
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .pagination .sm\:hidden a,
+    .pagination .sm\:hidden span {
+        flex: 1 1 0;
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
 }
 
 @media (max-width: 430px) {
