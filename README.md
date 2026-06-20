@@ -10,12 +10,6 @@ copy .env.example .env
 php artisan key:generate
 ```
 
-Ako `composer` nije globalno instaliran, u ovom projektu je moguće koristiti lokalni Composer:
-
-```bash
-php composer.phar install
-```
-
 U `.env` podesiti MySQL bazu za XAMPP:
 
 ```env

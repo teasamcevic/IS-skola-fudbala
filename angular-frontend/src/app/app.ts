@@ -13,7 +13,6 @@ interface NavigationItem {
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink],
   templateUrl: './app.html',
-  styleUrl: './app.css',
 })
 export class App {
   readonly auth = inject(AuthService);
