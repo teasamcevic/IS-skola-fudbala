@@ -3,13 +3,15 @@
 @section('content')
 <div class="page-head">
     <div>
-        <h1>Moje selekcije</h1>
-        <p class="subhead">Selekcije i članovi</p>
+        <h1>Moja selekcija</h1>
+        <p class="subhead">Selekcija, treneri i članovi</p>
     </div>
 </div>
-@foreach($selekcije as $selekcija)
+
+@forelse($selekcije as $selekcija)
     <div class="card">
         <h2>{{ $selekcija->naziv }} · {{ $selekcija->uzrasna_kategorija }}</h2>
+        <p class="muted">Treneri: {{ $selekcija->treneri_lista }}</p>
         <p class="muted">Broj članova: {{ $selekcija->clanovi->count() }}</p>
         <div class="table-wrap">
         <table>
@@ -20,5 +22,7 @@
         </table>
         </div>
     </div>
-@endforeach
+@empty
+    <div class="card">Trener trenutno nije dodeljen nijednoj selekciji.</div>
+@endforelse
 @endsection

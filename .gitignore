@@ -5,9 +5,12 @@
 /composer-setup.php
 /public/hot
 /public/storage
+/public/angular-build
+/public/app
 /storage/*.key
 /storage/logs/*.log
 /.env
+/.phpunit.result.cache
 /.env.backup
 /.phpunit.cache
 /bootstrap/cache/*.php

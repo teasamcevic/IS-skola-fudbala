@@ -1,0 +1,11 @@
+.git
+.env
+.phpunit.result.cache
+angular-frontend/.angular
+angular-frontend/dist
+angular-frontend/node_modules
+node_modules
+public/angular-build
+public/app
+storage/logs/*
+vendor

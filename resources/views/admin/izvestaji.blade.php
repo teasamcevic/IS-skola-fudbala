@@ -1,18 +1,18 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 <div class="page-head">
     <div>
-        <h1>Izveštaji</h1>
-        <p class="subhead">Sažeci evidencija</p>
+        <h1>IzveÅ¡taji</h1>
+        <p class="subhead">SaÅ¾eci evidencija</p>
     </div>
 </div>
 
 <div class="card">
-    <h2>Individualni izveštaj o napretku igrača</h2>
+    <h2>Individualni izveÅ¡taj o napretku igraÄa</h2>
     <div class="table-wrap">
     <table>
-        <tr><th>Igrač</th><th>Nastupi</th><th>Golovi</th><th>Prosečna ocena</th></tr>
+        <tr><th>IgraÄ</th><th>Nastupi</th><th>Golovi</th><th>ProseÄna ocena</th></tr>
         @foreach($napredak as $clan)
             <tr>
                 <td>{{ $clan->puno_ime }}</td>
@@ -29,10 +29,10 @@
     <h2>Statistika nastupa po utakmicama</h2>
     <div class="table-wrap">
     <table>
-        <tr><th>Utakmica</th><th>Igrača</th><th>Golovi</th><th>Asistencije</th></tr>
+        <tr><th>Utakmica</th><th>IgraÄa</th><th>Golovi</th><th>Asistencije</th></tr>
         @foreach($nastupiPoUtakmicama as $red)
             <tr>
-                <td>{{ $red->utakmica->datum }} · {{ $red->utakmica->protivnik }}</td>
+                <td>{{ $red->utakmica->datum }} Â· {{ $red->utakmica->protivnik }}</td>
                 <td>{{ $red->igraca }}</td>
                 <td>{{ $red->golovi }}</td>
                 <td>{{ $red->asistencije }}</td>
@@ -46,7 +46,7 @@
     <h2>Pregled formiranih timova</h2>
     <div class="table-wrap">
     <table>
-        <tr><th>Tim</th><th>Utakmica</th><th>Selekcija</th><th>Broj igrača</th></tr>
+        <tr><th>Tim</th><th>Utakmica</th><th>Selekcija</th><th>Broj igraÄa</th></tr>
         @foreach($timovi as $tim)
             <tr>
                 <td>{{ $tim->naziv }}</td>
@@ -60,10 +60,10 @@
 </div>
 
 <div class="card">
-    <h2>Uspešnost selekcija</h2>
+    <h2>UspeÅ¡nost selekcija</h2>
     <div class="table-wrap">
     <table>
-        <tr><th>Selekcija</th><th>Članovi</th><th>Utakmice</th><th>Pobede</th><th>Nerešeno</th><th>Porazi</th></tr>
+        <tr><th>Selekcija</th><th>Treneri</th><th>Članovi</th><th>Utakmice</th><th>Pobede</th><th>Nerešeno</th><th>Porazi</th></tr>
         @foreach($selekcije as $selekcija)
             @php
                 $odigrane = $selekcija->utakmice->filter(fn($u) => $u->golovi_domacin !== null && $u->golovi_gost !== null);
@@ -73,6 +73,7 @@
             @endphp
             <tr>
                 <td>{{ $selekcija->naziv }}</td>
+                <td>{{ $selekcija->treneri_lista }}</td>
                 <td>{{ $selekcija->clanovi_count }}</td>
                 <td>{{ $odigrane->count() }}</td>
                 <td>{{ $pobede }}</td>
@@ -85,7 +86,7 @@
 </div>
 
 <div class="card">
-    <h2>Naplata članarina</h2>
+    <h2>Naplata Älanarina</h2>
     <div class="table-wrap">
     <table>
         <tr><th>Status</th><th>Broj</th><th>Ukupno</th></tr>

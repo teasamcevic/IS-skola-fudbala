@@ -40,11 +40,18 @@ php artisan serve
 ## Glavne stranice
 
 - `/`
-- `/login`
-- `/register`
+- `/login` → Angular `/app/login`
+- `/register` → Angular `/app/register`
+- `/app/treninzi/novi` (Angular kreiranje treninga)
 - `/admin/dashboard`
 - `/trener/dashboard`
 - `/roditelj/dashboard`
+
+## Railway
+
+Railway koristi `Dockerfile` koji gradi Angular i Laravel u jednom servisu.
+Angular, Laravel web rute i REST API zato rade preko istog HTTPS domena.
+Detaljna podešavanja promenljivih nalaze se u `RAILWAY_DEPLOY.md`.
 
 ## Moduli
 

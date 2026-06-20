@@ -1,0 +1,93 @@
+<div class="toolbar">
+  <div>
+    <h1>Novi trening</h1>
+    <p class="subhead">Zakazivanje novog termina treninga</p>
+  </div>
+  <a class="btn secondary" [href]="trainingListUrl()">Nazad</a>
+</div>
+
+@if (message) {
+  <div class="notice error-notice">{{ message }}</div>
+}
+
+@if (loading) {
+  <p class="loading">Učitavanje forme...</p>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="card">
+      <h2>Podaci o treningu</h2>
+      <div class="form-grid">
+        <div>
+          <label for="datum">Datum</label>
+          <input id="datum" type="date" formControlName="datum" [min]="minDate" />
+          @if (form.controls.datum.touched && form.controls.datum.invalid) {
+            <span class="field-error">Datum je obavezan i ne sme biti u prošlosti.</span>
+          }
+          @for (error of serverErrors['datum'] ?? []; track error) {
+            <span class="field-error">{{ error }}</span>
+          }
+        </div>
+
+        <div>
+          <label for="vreme">Vreme</label>
+          <input id="vreme" type="time" formControlName="vreme" />
+          @if (form.controls.vreme.touched && form.controls.vreme.invalid) {
+            <span class="field-error">Vreme je obavezno.</span>
+          }
+          @for (error of serverErrors['vreme'] ?? []; track error) {
+            <span class="field-error">{{ error }}</span>
+          }
+        </div>
+
+        <div>
+          <label for="lokacija">Lokacija</label>
+          <input id="lokacija" type="text" formControlName="lokacija" />
+          @if (form.controls.lokacija.touched && form.controls.lokacija.hasError('required')) {
+            <span class="field-error">Lokacija je obavezna.</span>
+          }
+          @for (error of serverErrors['lokacija'] ?? []; track error) {
+            <span class="field-error">{{ error }}</span>
+          }
+        </div>
+
+        <div>
+          <label for="selekcija">Selekcija</label>
+          <select id="selekcija" formControlName="selekcija_id">
+            <option [ngValue]="0">Izaberite selekciju</option>
+            @for (selection of selections(); track selection.id) {
+              <option [ngValue]="selection.id">
+                {{ selection.naziv }} · {{ selection.uzrasna_kategorija }}
+              </option>
+            }
+          </select>
+          @if (form.controls.selekcija_id.touched && form.controls.selekcija_id.invalid) {
+            <span class="field-error">Selekcija je obavezna.</span>
+          }
+          @for (error of serverErrors['selekcija_id'] ?? []; track error) {
+            <span class="field-error">{{ error }}</span>
+          }
+        </div>
+
+        <div>
+          <label for="trener">Trener</label>
+          <select id="trener" formControlName="trener_id">
+            <option [ngValue]="0">Izaberite trenera</option>
+            @for (coach of filteredCoaches(); track coach.id) {
+              <option [ngValue]="coach.id">{{ coach.puno_ime }}</option>
+            }
+          </select>
+          @if (form.controls.trener_id.touched && form.controls.trener_id.invalid) {
+            <span class="field-error">Trener je obavezan.</span>
+          }
+          @for (error of serverErrors['trener_id'] ?? []; track error) {
+            <span class="field-error">{{ error }}</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Čuvanje...' : 'Sačuvaj trening' }}
+    </button>
+  </form>
+}

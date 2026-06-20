@@ -8,11 +8,16 @@ class Selekcija extends Model
 {
     protected $table = 'selekcije';
 
-    protected $fillable = ['naziv', 'uzrasna_kategorija', 'trener_id'];
+    protected $fillable = ['naziv', 'uzrasna_kategorija'];
 
-    public function trener()
+    public function treneri()
     {
-        return $this->belongsTo(Trener::class);
+        return $this->hasMany(Trener::class);
+    }
+
+    public function getTreneriListaAttribute(): string
+    {
+        return $this->treneri->pluck('puno_ime')->join(', ') ?: 'Nema dodeljenih trenera';
     }
 
     public function clanovi()

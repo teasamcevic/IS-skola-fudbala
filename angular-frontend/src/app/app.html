@@ -1,0 +1,42 @@
+<header class="topbar">
+  <a class="brand" [href]="webUrl('/')">
+    <span class="brand-mark" aria-hidden="true">⚽</span>
+    Škola fudbala
+  </a>
+
+  <div class="topbar-actions">
+    @if (auth.user(); as user) {
+      <span class="user-chip">{{ user.name }} · {{ roleLabel(user.role) }}</span>
+      <button type="button" class="secondary" (click)="logout()">Logout</button>
+    } @else {
+      <a class="btn secondary" routerLink="/login">Login</a>
+      <a class="btn" routerLink="/register">Register</a>
+    }
+  </div>
+</header>
+
+@if (auth.isAuthenticated()) {
+  <div class="shell">
+    <details class="mobile-menu">
+      <summary>Meni</summary>
+      <nav>
+        @for (item of navigation(); track item.url) {
+          <a [href]="item.url" [class.active]="item.active">{{ item.label }}</a>
+        }
+      </nav>
+    </details>
+
+    <aside class="sidebar">
+      <div class="nav-kicker">{{ navigationTitle() }}</div>
+      @for (item of navigation(); track item.url) {
+        <a [href]="item.url" [class.active]="item.active">{{ item.label }}</a>
+      }
+    </aside>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <router-outlet />
+}

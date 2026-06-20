@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Trener;
 
 use App\Http\Controllers\Admin\NastupController as AdminNastupController;
 use App\Models\Clan;
-use App\Models\Selekcija;
 use App\Models\Utakmica;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -35,10 +34,10 @@ class NastupController extends AdminNastupController
 
     protected function fields(): array
     {
-        $selekcije = Selekcija::where('trener_id', auth()->user()->trener_id)->pluck('id');
+        $selekcijaId = auth()->user()->trener?->selekcija_id;
 
         return [
-            'clan_id' => ['label' => 'Igrač', 'type' => 'select', 'options' => Clan::whereIn('selekcija_id', $selekcije)->orderBy('prezime')->get()->pluck('puno_ime', 'id')->toArray()],
+            'clan_id' => ['label' => 'Igrač', 'type' => 'select', 'options' => Clan::where('selekcija_id', $selekcijaId)->orderBy('prezime')->get()->pluck('puno_ime', 'id')->toArray()],
             'utakmica_id' => ['label' => 'Utakmica', 'type' => 'select', 'options' => Utakmica::where('trener_id', auth()->user()->trener_id)->orderByDesc('datum')->get()->mapWithKeys(fn ($u) => [$u->id => $u->datum.' - '.$u->protivnik])->toArray()],
             'odigrani_minuti' => ['label' => 'Odigrani minuti', 'type' => 'number'],
             'golovi' => ['label' => 'Golovi', 'type' => 'number'],

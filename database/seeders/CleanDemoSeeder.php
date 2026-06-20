@@ -111,14 +111,14 @@ class CleanDemoSeeder extends Seeder
 
     private function createClanovi(array $selekcije): array
     {
-        $firstNames = ['Luka', 'Vuk', 'Ognjen', 'Stefan', 'Nemanja', 'Filip', 'Uros', 'Pavle', 'Hamza', 'Tarik'];
-        $lastNames = ['Ilic', 'Savic', 'Milic', 'Kostic', 'Jovanovic', 'Petrovic', 'Hadzic', 'Kucevic', 'Zukorlic', 'Radovic'];
+        $firstNames = ['Luka', 'Vuk', 'Ognjen', 'Stefan', 'Nemanja', 'Filip', 'Uroš', 'Pavle', 'Hamza', 'Tarik', 'Aleksa', 'Emir'];
+        $lastNames = ['Ilić', 'Savić', 'Milić', 'Kostić', 'Jovanović', 'Petrović', 'Hadžić', 'Kučevac', 'Zukorlić', 'Radović', 'Nikolić', 'Đorđević'];
         $birthYears = ['U9' => 2017, 'U13' => 2013, 'U15' => 2011, 'U17' => 2009];
         $clanovi = [];
         $globalIndex = 1;
 
         foreach ($selekcije as $selekcija) {
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 12; $i++) {
                 $emailIndex = str_pad((string) $globalIndex, 3, '0', STR_PAD_LEFT);
                 $data = [
                     'ime' => $firstNames[$i],
@@ -185,7 +185,12 @@ class CleanDemoSeeder extends Seeder
 
     private function createTreninzi(array $treneri, array $selekcije, array $clanovi): void
     {
-        $locations = ['Teren 1', 'Teren 2', 'Balon sala', 'Sportski centar'];
+        $locations = [
+            'Gradski stadion Novi Pazar',
+            'Sportski centar Pendik',
+            'Stadion Šutenovac',
+            'Balon sala Ras',
+        ];
 
         foreach ($selekcije as $index => $selekcija) {
             for ($week = 0; $week < 6; $week++) {
@@ -224,7 +229,7 @@ class CleanDemoSeeder extends Seeder
                         'datum' => Carbon::create(2026, 6, 8)->addWeeks($round)->addDays($index)->toDateString(),
                         'vreme' => $round % 2 === 0 ? '11:00' : '16:30',
                         'protivnik' => $opponents[($index + $round) % count($opponents)],
-                        'lokacija' => $round % 2 === 0 ? 'Gradski stadion' : 'Gostujuci teren',
+                        'lokacija' => $round % 2 === 0 ? 'Gradski stadion Novi Pazar' : 'Stadion protivničkog kluba',
                         'tip_terena' => $round % 2 === 0 ? 'domaci' : 'gostujuci',
                         'selekcija_id' => $selekcija['id'],
                         'trener_id' => $treneri[$index]['id'],

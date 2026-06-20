@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TimController as AdminTimController;
 use App\Http\Controllers\Admin\TrenerController as AdminTrenerController;
 use App\Http\Controllers\Admin\TreningController as AdminTreningController;
 use App\Http\Controllers\Admin\UtakmicaController as AdminUtakmicaController;
+use App\Http\Controllers\AngularAppController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardRedirectController;
@@ -23,11 +24,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
+// Angular rute koriste /app, dok su statički bundle fajlovi u /angular-build.
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth')->name('logout');
@@ -38,7 +38,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::resource('clanovi', AdminClanController::class)->except(['show']);
     Route::resource('treneri', AdminTrenerController::class)->except(['show']);
     Route::resource('selekcije', AdminSelekcijaController::class)->except(['show']);
-    Route::resource('treninzi', AdminTreningController::class)->except(['show']);
+    Route::resource('treninzi', AdminTreningController::class)->except(['show', 'store']);
     Route::resource('utakmice', AdminUtakmicaController::class)->except(['show']);
     Route::resource('timovi', AdminTimController::class)->except(['show']);
     Route::resource('napredak', AdminNastupController::class)->except(['show'])->parameters(['napredak' => 'nastup']);
@@ -51,7 +51,7 @@ Route::middleware(['auth', 'role:trener'])->prefix('trener')->name('trener.')->g
     Route::get('/selekcija', [TrenerDashboardController::class, 'selekcija'])->name('selekcija');
     Route::get('/clanovi', [TrenerDashboardController::class, 'clanovi'])->name('clanovi');
     Route::post('/clanovi/{clan}/selekcija', [TrenerDashboardController::class, 'dodeliSelekciju'])->name('clanovi.dodeli-selekciju');
-    Route::resource('treninzi', TrenerTreningController::class)->except(['show']);
+    Route::resource('treninzi', TrenerTreningController::class)->except(['show', 'store']);
     Route::resource('utakmice', TrenerUtakmicaController::class)->except(['show']);
     Route::resource('timovi', TrenerTimController::class)->except(['show']);
     Route::resource('napredak', TrenerNastupController::class)->except(['show'])->parameters(['napredak' => 'nastup']);
@@ -65,3 +65,9 @@ Route::middleware(['auth', 'role:clan_roditelj'])->prefix('roditelj')->name('rod
     Route::get('/napredak', [RoditeljController::class, 'napredak'])->name('napredak');
     Route::get('/clanarine', [RoditeljController::class, 'clanarine'])->name('clanarine');
 });
+
+// Produkcioni Angular bundle se servira sa istog Railway domena pod /app.
+// Fajlovi su fizički u /angular-build da se direktorijum ne bi sudario sa rutom /app.
+Route::get('/app/{path?}', AngularAppController::class)
+    ->where('path', '.*')
+    ->name('angular.app');

@@ -10,31 +10,16 @@ class AuthenticatedSessionController extends Controller
 {
     public function create()
     {
-        return view('auth.login');
-    }
-
-    public function store(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Uneti podaci nisu ispravni.'])->onlyInput('email');
-        }
-
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard'));
+        return redirect()->away(rtrim(config('app.frontend_url'), '/').'/login');
     }
 
     public function destroy(Request $request)
     {
+        $request->user()->tokens()->delete();
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->away(rtrim(config('app.frontend_url'), '/').'/login?logout=1');
     }
 }

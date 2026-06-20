@@ -14,36 +14,38 @@ class DashboardController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $trenerId = $request->user()->trener_id;
-        $selekcije = Selekcija::where('trener_id', $trenerId)->pluck('id');
+        $trener = $request->user()->trener;
+        $selekcijaId = $trener?->selekcija_id;
 
         return view('trener.dashboard', [
             'metrics' => [
-                'Moje selekcije' => $selekcije->count(),
-                'Članovi u mojim selekcijama' => Clan::whereIn('selekcija_id', $selekcije)->count(),
+                'Moja selekcija' => $trener?->selekcija?->naziv ?? 'Nije dodeljena',
+                'Članovi u mojoj selekciji' => $selekcijaId ? Clan::where('selekcija_id', $selekcijaId)->count() : 0,
                 'Nedodeljeni članovi' => Clan::whereNull('selekcija_id')->count(),
-                'Treninzi' => Trening::where('trener_id', $trenerId)->count(),
-                'Utakmice' => Utakmica::where('trener_id', $trenerId)->count(),
-                'Evidentirani nastupi' => NastupIgraca::whereHas('utakmica', fn ($q) => $q->where('trener_id', $trenerId))->count(),
+                'Treninzi' => Trening::where('trener_id', $trener?->id)->count(),
+                'Utakmice' => Utakmica::where('trener_id', $trener?->id)->count(),
+                'Evidentirani nastupi' => NastupIgraca::whereHas('utakmica', fn ($q) => $q->where('trener_id', $trener?->id))->count(),
             ],
         ]);
     }
 
     public function selekcija(Request $request)
     {
+        $selekcijaId = $request->user()->trener?->selekcija_id;
+
         return view('trener.selekcija', [
-            'selekcije' => Selekcija::with('clanovi')->where('trener_id', $request->user()->trener_id)->get(),
+            'selekcije' => Selekcija::with(['clanovi', 'treneri'])->whereKey($selekcijaId)->get(),
         ]);
     }
 
     public function clanovi(Request $request)
     {
-        $selekcijeIds = Selekcija::where('trener_id', $request->user()->trener_id)->pluck('id');
+        $selekcija = $request->user()->trener?->selekcija;
 
         return view('trener.clanovi', [
-            'selekcije' => Selekcija::where('trener_id', $request->user()->trener_id)->orderBy('naziv')->get(),
+            'selekcije' => $selekcija ? collect([$selekcija]) : collect(),
             'clanovi' => Clan::with('selekcija')
-                ->where(fn ($query) => $query->whereNull('selekcija_id')->orWhereIn('selekcija_id', $selekcijeIds))
+                ->where(fn ($query) => $query->whereNull('selekcija_id')->when($selekcija, fn ($q) => $q->orWhere('selekcija_id', $selekcija->id)))
                 ->orderByRaw('selekcija_id is not null')
                 ->orderBy('prezime')
                 ->get(),
@@ -52,17 +54,18 @@ class DashboardController extends Controller
 
     public function dodeliSelekciju(Request $request, Clan $clan)
     {
-        $selekcijeIds = Selekcija::where('trener_id', $request->user()->trener_id)->pluck('id');
+        $selekcijaId = $request->user()->trener?->selekcija_id;
 
-        abort_unless($clan->selekcija_id === null || $selekcijeIds->contains($clan->selekcija_id), 403);
+        abort_unless($selekcijaId, 403);
+        abort_unless($clan->selekcija_id === null || $clan->selekcija_id === $selekcijaId, 403);
 
-        $data = $request->validate([
+        $request->validate([
             'selekcija_id' => ['required', 'exists:selekcije,id'],
         ]);
 
-        abort_unless($selekcijeIds->contains((int) $data['selekcija_id']), 403);
+        abort_unless((int) $request->input('selekcija_id') === $selekcijaId, 403);
 
-        $clan->update(['selekcija_id' => $data['selekcija_id']]);
+        $clan->update(['selekcija_id' => $selekcijaId]);
 
         return back()->with('success', 'Član je dodeljen selekciji.');
     }

@@ -8,6 +8,7 @@ use App\Models\Selekcija;
 use App\Models\Trener;
 use App\Models\Trening;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TreningController extends ResourceController
 {
@@ -16,18 +17,11 @@ class TreningController extends ResourceController
     protected string $routeBase = 'admin.treninzi';
     protected array $with = ['selekcija', 'trener', 'prisustva.clan'];
     protected array $columns = ['datum' => 'Datum', 'vreme' => 'Vreme', 'lokacija' => 'Lokacija', 'selekcija.naziv' => 'Selekcija', 'trener.puno_ime' => 'Trener'];
-    protected array $rules = [
-        'datum' => ['required', 'date'],
-        'vreme' => ['required'],
-        'lokacija' => ['required', 'string', 'max:100'],
-        'selekcija_id' => ['required', 'exists:selekcije,id'],
-        'trener_id' => ['required', 'exists:treneri,id'],
-        'prisustvo' => ['array'],
-    ];
 
     public function create()
     {
-        return view('admin.treninzi.form', $this->formData());
+        // Kreiranje treninga je Angular proces; lista i izmene ostaju Blade.
+        return redirect()->away(rtrim(config('app.frontend_url'), '/').'/treninzi/novi');
     }
 
     public function edit($id)
@@ -35,19 +29,10 @@ class TreningController extends ResourceController
         return view('admin.treninzi.form', $this->formData($this->query()->findOrFail($id)));
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate($this->rules);
-        $trening = Trening::create(collect($data)->except('prisustvo')->toArray());
-        $this->syncPrisustvo($trening, $request->input('prisustvo', []));
-
-        return redirect()->route($this->routeBase.'.index')->with('success', 'Trening je sačuvan.');
-    }
-
     public function update(Request $request, $id)
     {
         $trening = $this->query()->findOrFail($id);
-        $data = $request->validate($this->rules);
+        $data = $request->validate($this->validationRules($request));
         $trening->update(collect($data)->except('prisustvo')->toArray());
         $this->syncPrisustvo($trening, $request->input('prisustvo', []));
 
@@ -61,7 +46,7 @@ class TreningController extends ResourceController
             'vreme' => ['label' => 'Vreme', 'type' => 'time'],
             'lokacija' => ['label' => 'Lokacija', 'type' => 'text'],
             'selekcija_id' => ['label' => 'Selekcija', 'type' => 'select', 'options' => Selekcija::orderBy('naziv')->pluck('naziv', 'id')->toArray()],
-            'trener_id' => ['label' => 'Trener', 'type' => 'select', 'options' => Trener::orderBy('prezime')->get()->pluck('puno_ime', 'id')->toArray()],
+            'trener_id' => ['label' => 'Trener', 'type' => 'select', 'options' => $this->trenerOptions()],
         ];
     }
 
@@ -86,5 +71,27 @@ class TreningController extends ResourceController
                 ['prisutan' => isset($prisustvo[$clanId])]
             );
         }
+    }
+
+    protected function validationRules(Request $request): array
+    {
+        return [
+            'datum' => ['required', 'date'],
+            'vreme' => ['required'],
+            'lokacija' => ['required', 'string', 'max:100'],
+            'selekcija_id' => ['required', 'exists:selekcije,id'],
+            'trener_id' => ['required', Rule::exists('treneri', 'id')->where('selekcija_id', $request->input('selekcija_id'))],
+            'prisustvo' => ['array'],
+        ];
+    }
+
+    protected function trenerOptions()
+    {
+        return Trener::with('selekcija')
+            ->whereNotNull('selekcija_id')
+            ->orderBy('prezime')
+            ->get()
+            ->mapWithKeys(fn ($trener) => [$trener->id => $trener->puno_ime.' · '.$trener->selekcija->naziv])
+            ->toArray();
     }
 }

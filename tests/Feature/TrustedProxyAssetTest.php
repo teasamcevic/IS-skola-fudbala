@@ -14,8 +14,6 @@ class TrustedProxyAssetTest extends TestCase
                 'X-Forwarded-Proto' => 'https',
             ])
             ->get('/login')
-            ->assertOk()
-            ->assertSee('href="https://example.up.railway.app/css/style.css"', false)
-            ->assertSee('action="https://example.up.railway.app/login"', false);
+            ->assertRedirect('http://127.0.0.1:4200/login');
     }
 }

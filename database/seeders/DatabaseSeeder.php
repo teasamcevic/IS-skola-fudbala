@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (User::where('email', 'admin@skola.rs')->exists()) {
+            return;
+        }
+
         $trenerMarko = Trener::create([
             'ime' => 'Marko',
             'prezime' => 'Petrović',
@@ -36,16 +40,46 @@ class DatabaseSeeder extends Seeder
             'datum_zaposlenja' => '2022-02-01',
         ]);
 
-        $pioniri = Selekcija::create(['naziv' => 'Pioniri', 'uzrasna_kategorija' => 'U13', 'trener_id' => $trenerMarko->id]);
-        $kadeti = Selekcija::create(['naziv' => 'Kadeti', 'uzrasna_kategorija' => 'U15', 'trener_id' => $trenerMarko->id]);
-        $juniori = Selekcija::create(['naziv' => 'Juniori', 'uzrasna_kategorija' => 'U17', 'trener_id' => $trenerNikola->id]);
+        $trenerAleksandar = Trener::create([
+            'ime' => 'Aleksandar',
+            'prezime' => 'Mehmedović',
+            'datum_rodjenja' => '1988-12-03',
+            'telefon' => '060555777',
+            'licenca' => 'UEFA B',
+            'datum_zaposlenja' => '2023-03-01',
+        ]);
+
+        $trenerEmir = Trener::create([
+            'ime' => 'Emir',
+            'prezime' => 'Hadžić',
+            'datum_rodjenja' => '1986-06-18',
+            'telefon' => '060888999',
+            'licenca' => 'UEFA A',
+            'datum_zaposlenja' => '2020-07-01',
+        ]);
+
+        $pioniri = Selekcija::create(['naziv' => 'Pioniri', 'uzrasna_kategorija' => 'U13']);
+        $kadeti = Selekcija::create(['naziv' => 'Kadeti', 'uzrasna_kategorija' => 'U15']);
+        $juniori = Selekcija::create(['naziv' => 'Juniori', 'uzrasna_kategorija' => 'U17']);
+
+        $trenerMarko->update(['selekcija_id' => $pioniri->id]);
+        $trenerNikola->update(['selekcija_id' => $pioniri->id]);
+        $trenerAleksandar->update(['selekcija_id' => $kadeti->id]);
+        $trenerEmir->update(['selekcija_id' => $juniori->id]);
 
         $clanovi = collect([
             ['Luka', 'Ilić', '2012-03-11', '061111111', 'roditelj@skola.rs', $pioniri->id],
             ['Vuk', 'Savić', '2011-07-21', '061222222', 'vuk.rod@skola.rs', $pioniri->id],
+            ['Filip', 'Petrović', '2012-09-08', '061222333', 'filip.rod@skola.rs', $pioniri->id],
+            ['Pavle', 'Radović', '2011-12-17', '061222444', 'pavle.rod@skola.rs', $pioniri->id],
+            ['Hamza', 'Hadžić', '2012-06-25', '061222555', 'hamza.rod@skola.rs', $pioniri->id],
             ['Ognjen', 'Milić', '2010-02-15', '061333333', 'ognjen.rod@skola.rs', $kadeti->id],
             ['Stefan', 'Kostić', '2009-11-09', '061444444', 'stefan.rod@skola.rs', $kadeti->id],
+            ['Uroš', 'Jovanović', '2010-08-19', '061444555', 'uros.rod@skola.rs', $kadeti->id],
+            ['Tarik', 'Kučevac', '2009-04-27', '061444666', 'tarik.rod@skola.rs', $kadeti->id],
             ['Nemanja', 'Đorđević', '2008-05-30', '061555555', 'nemanja.rod@skola.rs', $juniori->id],
+            ['Aleksa', 'Nikolić', '2008-10-13', '061555666', 'aleksa.rod@skola.rs', $juniori->id],
+            ['Emir', 'Zukorlić', '2007-07-06', '061555777', 'emir.rod@skola.rs', $juniori->id],
         ])->map(fn ($data) => Clan::create([
             'ime' => $data[0],
             'prezime' => $data[1],
@@ -80,9 +114,29 @@ class DatabaseSeeder extends Seeder
             'clan_id' => $clanovi[0]->id,
         ]);
 
-        $trening1 = Trening::create(['datum' => '2026-06-03', 'vreme' => '18:00', 'lokacija' => 'Teren 1', 'selekcija_id' => $pioniri->id, 'trener_id' => $trenerMarko->id]);
-        $trening2 = Trening::create(['datum' => '2026-06-04', 'vreme' => '19:00', 'lokacija' => 'Teren 2', 'selekcija_id' => $kadeti->id, 'trener_id' => $trenerMarko->id]);
-        Trening::create(['datum' => '2026-06-05', 'vreme' => '17:30', 'lokacija' => 'Balon sala', 'selekcija_id' => $juniori->id, 'trener_id' => $trenerNikola->id]);
+        $trening1 = Trening::create([
+            'datum' => '2026-06-03',
+            'vreme' => '18:00',
+            'lokacija' => 'Gradski stadion Novi Pazar',
+            'selekcija_id' => $pioniri->id,
+            'trener_id' => $trenerMarko->id,
+        ]);
+
+        $trening2 = Trening::create([
+            'datum' => '2026-06-04',
+            'vreme' => '19:00',
+            'lokacija' => 'Sportski centar Pendik',
+            'selekcija_id' => $kadeti->id,
+            'trener_id' => $trenerAleksandar->id,
+        ]);
+
+        Trening::create([
+            'datum' => '2026-06-05',
+            'vreme' => '17:30',
+            'lokacija' => 'Stadion Šutenovac',
+            'selekcija_id' => $juniori->id,
+            'trener_id' => $trenerEmir->id,
+        ]);
 
         foreach ($pioniri->clanovi as $clan) {
             $trening1->prisustva()->create(['clan_id' => $clan->id, 'prisutan' => true]);
@@ -110,7 +164,7 @@ class DatabaseSeeder extends Seeder
             'lokacija' => 'Sportski centar',
             'tip_terena' => 'gostujuci',
             'selekcija_id' => $kadeti->id,
-            'trener_id' => $trenerMarko->id,
+            'trener_id' => $trenerAleksandar->id,
             'golovi_domacin' => null,
             'golovi_gost' => null,
         ]);

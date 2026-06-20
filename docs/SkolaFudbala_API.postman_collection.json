@@ -1,0 +1,355 @@
+{
+  "info": {
+    "name": "IS škola fudbala - Login/Register i Treninzi",
+    "_postman_id": "8b46ab5c-2240-4b88-96b1-97ea68f6cc10",
+    "description": "REST API testovi za Laravel Sanctum autentifikaciju i CRUD procesa treninga.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" },
+    { "key": "selekcija_id", "value": "" },
+    { "key": "trener_id", "value": "" },
+    { "key": "trening_id", "value": "" },
+    { "key": "unique_email", "value": "" },
+    { "key": "future_date", "value": "" },
+    { "key": "past_date", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Autentifikacija",
+      "item": [
+        {
+          "name": "Uspešan register",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('unique_email', `postman.${Date.now()}@example.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Vraćen token', () => pm.expect(pm.response.json().token).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Postman Korisnik\",\"email\":\"{{unique_email}}\",\"password\":\"Test1234\",\"password_confirmation\":\"Test1234\",\"ime\":\"Luka\",\"prezime\":\"Postman\",\"datum_rodjenja\":\"2012-05-10\",\"telefon_roditelja\":\"060123456\"}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Register bez email-a",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Email greška', () => pm.expect(pm.response.json().errors.email).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Tea\",\"email\":\"\",\"password\":\"Test1234\",\"password_confirmation\":\"Test1234\",\"ime\":\"Luka\",\"prezime\":\"Test\",\"datum_rodjenja\":\"2012-05-10\",\"telefon_roditelja\":\"060123456\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Register nevalidan email",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Format email-a odbijen', () => pm.expect(pm.response.json().errors.email).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Tea\",\"email\":\"tea.test\",\"password\":\"Test1234\",\"password_confirmation\":\"Test1234\",\"ime\":\"Luka\",\"prezime\":\"Test\",\"datum_rodjenja\":\"2012-05-10\",\"telefon_roditelja\":\"060123456\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Register password 7 karaktera",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Minimum 8 karaktera', () => pm.expect(pm.response.json().errors.password).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Tea\",\"email\":\"kratka@example.com\",\"password\":\"1234567\",\"password_confirmation\":\"1234567\",\"ime\":\"Luka\",\"prezime\":\"Test\",\"datum_rodjenja\":\"2012-05-10\",\"telefon_roditelja\":\"060123456\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Register potvrda se ne poklapa",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Potvrda lozinke odbijena', () => pm.expect(pm.response.json().errors.password).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Tea\",\"email\":\"potvrda@example.com\",\"password\":\"Test1234\",\"password_confirmation\":\"Druga1234\",\"ime\":\"Luka\",\"prezime\":\"Test\",\"datum_rodjenja\":\"2012-05-10\",\"telefon_roditelja\":\"060123456\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/register"
+          }
+        },
+        {
+          "name": "Uspešan login administratora",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('token', pm.response.json().token);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"admin@skola.rs\",\"password\":\"password\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/login"
+          }
+        },
+        {
+          "name": "Login pogrešna lozinka",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('HTTP 422', () => pm.response.to.have.status(422));"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"admin@skola.rs\",\"password\":\"pogresna\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/login"
+          }
+        },
+        {
+          "name": "Login nepostojeći korisnik",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('HTTP 422', () => pm.response.to.have.status(422));"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"nepostoji@skola.rs\",\"password\":\"password\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/login"
+          }
+        },
+        {
+          "name": "Prijavljeni korisnik",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('Administrator je vraćen', () => pm.expect(pm.response.json().user.role).to.eql('administrator'));"] }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Treninzi",
+      "item": [
+        {
+          "name": "Učitaj selekcije",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Selekcije učitane', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('selekcija_id', pm.response.json().data[0].id);"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/selekcije"
+          }
+        },
+        {
+          "name": "Učitaj trenere iz selekcije",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Treneri učitani', () => pm.response.to.have.status(200));",
+              "const selection = Number(pm.collectionVariables.get('selekcija_id'));",
+              "const coach = pm.response.json().data.find(item => Number(item.selekcija_id) === selection);",
+              "pm.expect(coach).to.exist;",
+              "pm.collectionVariables.set('trener_id', coach.id);"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/treneri"
+          }
+        },
+        {
+          "name": "Uspešno kreiranje treninga",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "exec": [
+                "const future = new Date(); future.setDate(future.getDate() + 2);",
+                "const past = new Date(); past.setDate(past.getDate() - 1);",
+                "pm.collectionVariables.set('future_date', future.toISOString().slice(0, 10));",
+                "pm.collectionVariables.set('past_date', past.toISOString().slice(0, 10));"
+              ]}
+            },
+            {
+              "listen": "test",
+              "script": { "exec": [
+                "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                "pm.collectionVariables.set('trening_id', pm.response.json().data.id);"
+              ]}
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{future_date}}\",\"vreme\":\"18:00\",\"lokacija\":\"Postman teren\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Lista treninga",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('Lista sadrži podatke', () => pm.expect(pm.response.json().data).to.be.an('array'));"] }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Detalji treninga",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('Vraćen kreirani trening', () => pm.expect(pm.response.json().data.id).to.eql(Number(pm.collectionVariables.get('trening_id'))));"] }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/treninzi/{{trening_id}}"
+          }
+        },
+        {
+          "name": "Izmena treninga",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('Lokacija je izmenjena', () => pm.expect(pm.response.json().data.lokacija).to.eql('Izmenjeni teren'));"] }
+          }],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{future_date}}\",\"vreme\":\"19:00\",\"lokacija\":\"Izmenjeni teren\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi/{{trening_id}}"
+          }
+        },
+        {
+          "name": "Trening bez lokacije",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Lokacija greška', () => pm.expect(pm.response.json().errors.lokacija).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{future_date}}\",\"vreme\":\"18:00\",\"lokacija\":\"\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Trening u prošlosti",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Datum greška', () => pm.expect(pm.response.json().errors.datum).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{past_date}}\",\"vreme\":\"18:00\",\"lokacija\":\"Teren\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Trening bez selekcije i trenera",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+              "pm.test('Obe greške postoje', () => { const e=pm.response.json().errors; pm.expect(e.selekcija_id).to.exist; pm.expect(e.trener_id).to.exist; });"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{future_date}}\",\"vreme\":\"18:00\",\"lokacija\":\"Teren\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Brisanje treninga",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('HTTP 200', () => pm.response.to.have.status(200));"] }
+          }],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/treninzi/{{trening_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

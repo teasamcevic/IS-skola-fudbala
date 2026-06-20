@@ -9,7 +9,7 @@ if (in_array($sessionDomain, [null, '', 'null', '"null"'], true)) {
 }
 
 return [
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'file'),
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
     'encrypt' => env('SESSION_ENCRYPT', false),

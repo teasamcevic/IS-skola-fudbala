@@ -5,6 +5,11 @@ return [
     'env' => env('APP_ENV', 'production'),
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
+
+    'frontend_url' => env(
+        'FRONTEND_URL',
+        rtrim(env('APP_URL', 'http://localhost'), '/').'/app'
+    ),
     'asset_url' => env('ASSET_URL'),
     'timezone' => env('APP_TIMEZONE', 'Europe/Belgrade'),
     'locale' => env('APP_LOCALE', 'sr'),

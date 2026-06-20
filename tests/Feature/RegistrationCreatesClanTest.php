@@ -16,7 +16,7 @@ class RegistrationCreatesClanTest extends TestCase
 
     public function test_parent_registration_creates_unassigned_member_profile(): void
     {
-        $response = $this->post('/register', [
+        $response = $this->postJson('/api/register', [
             'name' => 'Roditelj Test',
             'email' => 'novi.roditelj@example.com',
             'password' => 'password123',
@@ -27,7 +27,8 @@ class RegistrationCreatesClanTest extends TestCase
             'telefon_roditelja' => '060999888',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertCreated()
+            ->assertJsonPath('user.email', 'novi.roditelj@example.com');
 
         $this->assertDatabaseHas('clanovi', [
             'ime' => 'Lazar',
@@ -58,8 +59,9 @@ class RegistrationCreatesClanTest extends TestCase
         $selekcija = Selekcija::create([
             'naziv' => 'Pioniri',
             'uzrasna_kategorija' => 'U13',
-            'trener_id' => $trener->id,
         ]);
+
+        $trener->update(['selekcija_id' => $selekcija->id]);
 
         $clan = Clan::create([
             'ime' => 'Lazar',

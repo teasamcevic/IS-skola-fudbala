@@ -48,6 +48,6 @@ class RoditeljController extends Controller
 
     private function clan(Request $request): ?Clan
     {
-        return Clan::with(['selekcija.trener', 'clanarine', 'nastupi.utakmica'])->find($request->user()->clan_id);
+        return Clan::with(['selekcija.treneri', 'clanarine', 'nastupi.utakmica'])->find($request->user()->clan_id);
     }
 }

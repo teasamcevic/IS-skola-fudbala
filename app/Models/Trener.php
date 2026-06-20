@@ -8,16 +8,19 @@ class Trener extends Model
 {
     protected $table = 'treneri';
 
-    protected $fillable = ['ime', 'prezime', 'datum_rodjenja', 'telefon', 'licenca', 'datum_zaposlenja'];
+    protected $fillable = ['ime', 'prezime', 'datum_rodjenja', 'telefon', 'licenca', 'datum_zaposlenja', 'selekcija_id'];
+
+    // Potrebno Angular klijentu kada se model serijalizuje u JSON.
+    protected $appends = ['puno_ime'];
 
     public function getPunoImeAttribute(): string
     {
         return "{$this->ime} {$this->prezime}";
     }
 
-    public function selekcije()
+    public function selekcija()
     {
-        return $this->hasMany(Selekcija::class);
+        return $this->belongsTo(Selekcija::class);
     }
 
     public function treninzi()

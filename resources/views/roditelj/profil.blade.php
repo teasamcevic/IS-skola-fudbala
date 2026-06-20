@@ -18,7 +18,7 @@
             <tr><th>Datum učlanjenja</th><td>{{ $clan->datum_uclanjenja }}</td></tr>
             <tr><th>Status</th><td>{{ $clan->status_clana }}</td></tr>
             <tr><th>Selekcija</th><td>{{ $clan->selekcija ? $clan->selekcija->naziv.' · '.$clan->selekcija->uzrasna_kategorija : 'Čeka dodelu selekcije' }}</td></tr>
-            <tr><th>Trener</th><td>{{ $clan->selekcija?->trener?->puno_ime ?? 'Nije dodeljen' }}</td></tr>
+            <tr><th>Treneri</th><td>{{ $clan->selekcija?->treneri_lista ?? 'Nisu dodeljeni' }}</td></tr>
         </table>
         </div>
     </div>

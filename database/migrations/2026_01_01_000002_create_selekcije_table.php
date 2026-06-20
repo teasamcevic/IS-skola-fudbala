@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->id();
             $table->string('naziv', 50)->unique();
             $table->string('uzrasna_kategorija', 20);
-            $table->foreignId('trener_id')->constrained('treneri')->cascadeOnUpdate()->restrictOnDelete();
             $table->timestamps();
         });
     }
