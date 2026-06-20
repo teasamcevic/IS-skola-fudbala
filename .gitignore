@@ -11,6 +11,8 @@
 /storage/logs/*.log
 /.env
 /.phpunit.result.cache
+~$*.docx
+/docs/testplan-render-*
 /.env.backup
 /.phpunit.cache
 /bootstrap/cache/*.php
