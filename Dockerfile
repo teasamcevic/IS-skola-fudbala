@@ -6,6 +6,8 @@ COPY angular-frontend/package.json angular-frontend/package-lock.json ./
 RUN npm ci
 
 COPY angular-frontend/ ./
+# Angular koristi isti osnovni stylesheet kao postojeći Laravel/Blade interfejs.
+COPY public/css/ /public/css/
 RUN npm run build
 
 FROM php:8.3-cli-bookworm
