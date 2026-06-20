@@ -12,8 +12,10 @@ RUN npm run build
 
 FROM php:8.3-cli-bookworm
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libonig-dev libxml2-dev \
+    && apt-get install -y --no-install-recommends libonig-dev libxml2-dev unzip \
     && docker-php-ext-install dom mbstring pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
