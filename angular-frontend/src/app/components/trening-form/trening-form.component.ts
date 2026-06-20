@@ -1,11 +1,48 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors as FormValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { forkJoin, finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Selekcija, Trener, TreningPayload } from '../../models/api.models';
 import { apiMessage, validationErrors, ValidationErrors } from '../../shared/api-errors';
 import { AuthService } from '../../services/auth.service';
 import { TreningService } from '../../services/trening.service';
+
+function belgradeDateTime(date = new Date()): { date: string; time: string } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Belgrade',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    date: `${value['year']}-${value['month']}-${value['day']}`,
+    time: `${value['hour']}:${value['minute']}`,
+  };
+}
+
+function futureTrainingTerm(control: AbstractControl): FormValidationErrors | null {
+  const datum = control.get('datum')?.value;
+  const vreme = control.get('vreme')?.value;
+
+  if (!datum || !vreme) return null;
+
+  const now = belgradeDateTime();
+
+  return datum < now.date || (datum === now.date && vreme <= now.time)
+    ? { pastTrainingTerm: true }
+    : null;
+}
 
 @Component({
   selector: 'app-trening-form',
@@ -17,13 +54,16 @@ export class TreningFormComponent implements OnInit {
   private readonly service = inject(TreningService);
   private readonly auth = inject(AuthService);
 
-  readonly form = this.fb.nonNullable.group({
-    datum: ['', Validators.required],
-    vreme: ['', Validators.required],
-    lokacija: ['', [Validators.required, Validators.maxLength(100)]],
-    selekcija_id: [0, [Validators.required, Validators.min(1)]],
-    trener_id: [0, [Validators.required, Validators.min(1)]],
-  });
+  readonly form = this.fb.nonNullable.group(
+    {
+      datum: ['', Validators.required],
+      vreme: ['', Validators.required],
+      lokacija: ['', [Validators.required, Validators.maxLength(100)]],
+      selekcija_id: [0, [Validators.required, Validators.min(1)]],
+      trener_id: [0, [Validators.required, Validators.min(1)]],
+    },
+    { validators: futureTrainingTerm },
+  );
 
   readonly selections = signal<Selekcija[]>([]);
   readonly coaches = signal<Trener[]>([]);
@@ -32,7 +72,7 @@ export class TreningFormComponent implements OnInit {
     this.coaches().filter((coach) => coach.selekcija_id === this.selectedSelectionId()),
   );
 
-  readonly minDate = new Date().toISOString().slice(0, 10);
+  readonly minDate = belgradeDateTime().date;
   serverErrors: ValidationErrors = {};
   message = '';
   loading = true;
@@ -44,6 +84,13 @@ export class TreningFormComponent implements OnInit {
       : '/admin/treninzi';
 
     return `${environment.webBaseUrl}${path}`;
+  }
+
+  minimumTime(): string | null {
+    if (this.form.controls.datum.value !== belgradeDateTime().date) return null;
+
+    const nextMinute = new Date(Date.now() + 60_000);
+    return belgradeDateTime(nextMinute).time;
   }
 
   ngOnInit(): void {
@@ -79,6 +126,7 @@ export class TreningFormComponent implements OnInit {
   }
 
   submit(): void {
+    this.form.updateValueAndValidity();
     this.form.markAllAsTouched();
     this.serverErrors = {};
     this.message = '';

@@ -7,6 +7,7 @@ use App\Models\Trener;
 use App\Models\Trening;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -81,6 +82,35 @@ class ApiTreningTest extends TestCase
         Sanctum::actingAs($parent);
 
         $this->postJson('/api/treninzi', [])->assertForbidden();
+    }
+
+    public function test_training_cannot_be_scheduled_earlier_today(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-06-20 12:00', 'Europe/Belgrade'));
+        [$selekcija, $trener] = $this->selectionAndCoach();
+        $admin = User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@example.com',
+            'password' => 'password8',
+            'role' => 'administrator',
+        ]);
+        Sanctum::actingAs($admin);
+
+        $payload = [
+            'datum' => '2026-06-20',
+            'lokacija' => 'Gradski stadion Novi Pazar',
+            'selekcija_id' => $selekcija->id,
+            'trener_id' => $trener->id,
+        ];
+
+        $this->postJson('/api/treninzi', $payload + ['vreme' => '11:00'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['vreme']);
+
+        $this->postJson('/api/treninzi', $payload + ['vreme' => '12:01'])
+            ->assertCreated();
+
+        Carbon::setTestNow();
     }
 
     private function selectionAndCoach(): array

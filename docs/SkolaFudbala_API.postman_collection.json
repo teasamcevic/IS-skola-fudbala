@@ -13,7 +13,9 @@
     { "key": "trening_id", "value": "" },
     { "key": "unique_email", "value": "" },
     { "key": "future_date", "value": "" },
-    { "key": "past_date", "value": "" }
+    { "key": "past_date", "value": "" },
+    { "key": "today_date", "value": "" },
+    { "key": "past_time", "value": "" }
   ],
   "item": [
     {
@@ -315,6 +317,42 @@
               { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": { "mode": "raw", "raw": "{\"datum\":\"{{past_date}}\",\"vreme\":\"18:00\",\"lokacija\":\"Teren\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/treninzi"
+          }
+        },
+        {
+          "name": "Današnji trening sa prošlom satnicom",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "exec": [
+                "const now = new Date();",
+                "const year = now.getUTCFullYear();",
+                "const lastSunday = (month) => { const d = new Date(Date.UTC(year, month + 1, 0)); return d.getUTCDate() - d.getUTCDay(); };",
+                "const dstStart = new Date(Date.UTC(year, 2, lastSunday(2), 1));",
+                "const dstEnd = new Date(Date.UTC(year, 9, lastSunday(9), 1));",
+                "const offsetHours = now >= dstStart && now < dstEnd ? 2 : 1;",
+                "const belgradeNow = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);",
+                "const belgradePast = new Date(belgradeNow.getTime() - 60 * 60 * 1000);",
+                "pm.collectionVariables.set('today_date', belgradeNow.toISOString().slice(0, 10));",
+                "pm.collectionVariables.set('past_time', belgradePast.toISOString().slice(11, 16));"
+              ]}
+            },
+            {
+              "listen": "test",
+              "script": { "exec": [
+                "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                "pm.test('Prošla satnica je odbijena', () => pm.expect(pm.response.json().errors.vreme).to.exist);"
+              ]}
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"datum\":\"{{today_date}}\",\"vreme\":\"{{past_time}}\",\"lokacija\":\"Gradski stadion Novi Pazar\",\"selekcija_id\":{{selekcija_id}},\"trener_id\":{{trener_id}}}", "options": { "raw": { "language": "json" } } },
             "url": "{{base_url}}/api/treninzi"
           }
         },

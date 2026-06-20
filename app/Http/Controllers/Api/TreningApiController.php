@@ -8,7 +8,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TreningApiController extends Controller
 {
@@ -69,7 +71,7 @@ class TreningApiController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'datum' => ['required', 'date', 'after_or_equal:today'],
             'vreme' => ['required', 'date_format:H:i'],
             'lokacija' => ['required', 'string', 'max:100'],
@@ -93,6 +95,22 @@ class TreningApiController extends Controller
             'trener_id.required' => 'Trener je obavezan.',
             'trener_id.exists' => 'Trener ne postoji ili nije dodeljen izabranoj selekciji.',
         ]);
+
+        // Datum i vreme se proveravaju kao jedan termin, da današnji datum
+        // ne bi mogao da se kombinuje sa satnicom koja je već prošla.
+        $termin = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $data['datum'].' '.$data['vreme'],
+            config('app.timezone')
+        );
+
+        if ($termin->lessThanOrEqualTo(now(config('app.timezone')))) {
+            throw ValidationException::withMessages([
+                'vreme' => ['Termin treninga mora biti u budućnosti.'],
+            ]);
+        }
+
+        return $data;
     }
 
     private function visibleQuery(User $user): Builder

@@ -30,9 +30,12 @@
 
         <div>
           <label for="vreme">Vreme</label>
-          <input id="vreme" type="time" formControlName="vreme" />
+          <input id="vreme" type="time" formControlName="vreme" [min]="minimumTime()" />
           @if (form.controls.vreme.touched && form.controls.vreme.invalid) {
             <span class="field-error">Vreme je obavezno.</span>
+          }
+          @if (form.touched && form.hasError('pastTrainingTerm')) {
+            <span class="field-error">Termin treninga mora biti u budućnosti.</span>
           }
           @for (error of serverErrors['vreme'] ?? []; track error) {
             <span class="field-error">{{ error }}</span>
